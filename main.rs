@@ -8,6 +8,16 @@ use nom::{
 
 const RESERVED_KEYWORDS: String[] = {};
 
+#[derive(Debug, PartialEq, Clone)]
+enum Statement<'a> {
+    Object(Box<IndexMap<&'a str, JsonNode<'a>>>),
+    Array(Vec<JsonNode<'a>>),
+    String(&'a str),
+    Number(f64),
+    Boolean(bool),
+    Null,
+}
+
 fn sp<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
   let chars = " \t\r\n";
 
@@ -41,4 +51,10 @@ fn condition<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
     tuple(boolean_expression, opt(sp), logical_operator, opt(sp), boolean_expression)
   )
   .parse(i)
+}
+
+fn parse(i: &str) {
+    delimeted(
+      Statement
+    )
 }
