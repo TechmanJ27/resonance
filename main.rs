@@ -14,19 +14,31 @@ fn sp<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &'a str, E> {
   take_while(move |c| chars.contains(c))(i)
 }
 
-fn parens<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+fn boolean_expression<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
   i: &'a str,
 ) -> IResult<&str, &str> {
-  delimited(char('('), condition, char(')')).parse(i)
+  let expression = tuple(val, opt(sp), boolean_operator, opt(sp), val);
+  tuple(opt(char('!')), delimited(char('('), expression, char(')'))).parse(i)
+}
+
+fn boolean_operator<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+  i: &'a str,
+) -> IResult<&str, &str> {
+  alt(tag("=="), tag("!="), char('<'), char('>'), tag(">="), tag("<=")).parse(i)
+}
+
+fn logical_operator<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
+  i: &'a str,
+) -> IResult<&str, &str> {
+  alt(tag("||"), tag("&&")).parse(i)
 }
 
 fn condition<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
   i: &'a str,
-) -> IResult<&'a str, (&'a str, JsonValue), E> {
+) -> IResult<&str, &str> {
   alt(
-    condition,
     boolean_expression,
-    all(boolean_expression, sp, logical_operator, sp, boolean_expression)
+    tuple(boolean_expression, opt(sp), logical_operator, opt(sp), boolean_expression)
   )
   .parse(i)
 }
