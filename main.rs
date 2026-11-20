@@ -54,7 +54,10 @@ fn condition<'a, E: ParseError<&'a str> + ContextError<&'a str>>(
 }
 
 fn parse(i: &str) {
-    delimeted(
-      Statement
-    )
+    map(
+      delimeted(
+        condition
+      ),
+      |v| Statement::Object(Box::new(v.into_iter().collect())),
+    )(i)
 }
